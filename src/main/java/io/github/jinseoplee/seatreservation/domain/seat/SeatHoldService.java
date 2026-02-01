@@ -17,6 +17,7 @@ public class SeatHoldService {
         Seat seat = seatRepository.findByIdForUpdate(seatId)
                 .orElseThrow(() -> new IllegalArgumentException("좌석이 존재하지 않습니다."));
 
-        seat.hold(holder, holdUntil);
+        LocalDateTime now = LocalDateTime.now();
+        seat.hold(holder, holdUntil, now);
     }
 }

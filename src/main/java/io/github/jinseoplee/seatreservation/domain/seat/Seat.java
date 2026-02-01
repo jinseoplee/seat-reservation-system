@@ -35,12 +35,27 @@ public class Seat {
         this.status = SeatStatus.AVAILABLE;
     }
 
-    public void hold(String holder, LocalDateTime holdUntil) {
+    public void hold(String holder, LocalDateTime holdUntil, LocalDateTime now) {
+        if (isHoldExpired(now)) {
+            release();
+        }
         if (this.status != SeatStatus.AVAILABLE) {
             throw new IllegalStateException("이미 점유 중인 좌석입니다.");
         }
         this.status = SeatStatus.HOLD;
         this.holdBy = holder;
         this.holdUntil = holdUntil;
+    }
+
+    private boolean isHoldExpired(LocalDateTime now) {
+        return this.status == SeatStatus.HOLD
+                && this.holdUntil != null
+                && this.holdUntil.isBefore(now);
+    }
+
+    private void release() {
+        this.status = SeatStatus.AVAILABLE;
+        this.holdBy = null;
+        this.holdUntil = null;
     }
 }
