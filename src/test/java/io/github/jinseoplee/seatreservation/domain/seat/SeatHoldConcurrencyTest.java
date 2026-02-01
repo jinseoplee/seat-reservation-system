@@ -76,4 +76,20 @@ class SeatHoldConcurrencyTest {
         assertThat(reloaded.getHoldBy()).isNotBlank();
         assertThat(reloaded.getHoldUntil()).isNotNull();
     }
+
+    @Test
+    @DisplayName("만료된 HOLD는 다음 HOLD 요청 시 해제되고 다시 점유된다")
+    void expired_hold_is_released_on_next_hold() {
+        Seat seat = seatRepository.save(new Seat(1L, "A1"));
+        Long seatId = seat.getId();
+
+        seatHoldService.hold(seatId, "user-A", LocalDateTime.now().minusSeconds(1));
+
+        seatHoldService.hold(seatId, "user-B", LocalDateTime.now().plusMinutes(5));
+
+        Seat reloaded = seatRepository.findById(seatId).orElseThrow();
+        assertThat(reloaded.getStatus()).isEqualTo(SeatStatus.HOLD);
+        assertThat(reloaded.getHoldBy()).isEqualTo("user-B");
+        assertThat(reloaded.getHoldUntil()).isNotNull();
+    }
 }
