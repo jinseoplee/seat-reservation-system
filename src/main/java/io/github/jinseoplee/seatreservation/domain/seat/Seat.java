@@ -47,6 +47,22 @@ public class Seat {
         this.holdUntil = holdUntil;
     }
 
+    public void confirm(String confirmer, LocalDateTime now) {
+        if (isHoldExpired(now)) {
+            release();
+            throw new IllegalStateException("점유가 만료된 좌석은 확정할 수 없습니다.");
+        }
+        if (this.status != SeatStatus.HOLD) {
+            throw new IllegalStateException("점유 상태인 좌석만 확정할 수 있습니다.");
+        }
+        if (this.holdBy == null || !this.holdBy.equals(confirmer)) {
+            throw new IllegalStateException("해당 좌석을 점유한 사용자만 확정할 수 있습니다.");
+        }
+        this.status = SeatStatus.CONFIRMED;
+        this.holdBy = null;
+        this.holdUntil = null;
+    }
+
     private boolean isHoldExpired(LocalDateTime now) {
         return this.status == SeatStatus.HOLD
                 && this.holdUntil != null
